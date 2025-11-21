@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  # 1. SERVICIO DE BASE DE DATOS
+  mysql:
+    image: mysql:8.0
+    container_name: notifyhub_mysql
+    environment:
+      # Credenciales de la BD
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: notifyhub_db
+    ports:
+      - "3306:3306" # Opcional: para acceder a la BD desde tu host (workbench, etc.)
+    volumes:
+      # Esto asegura que los datos persistan
+      - mysql_data:/var/lib/mysql
+    # Usar un healthcheck para que las APIs esperen
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "root", "-proot_password"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      
+  # 2. SERVICIO DE API (Cambiado a 'api' sin réplicas por ahora)
+  api:
+    build: .
+    container_name: notifyhub_api
+    command: python api_service.py
+    environment:
+      # Pasa la configuración de la BD a la API
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASS: root_password
+      DB_NAME: notifyhub_db
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    depends_on:
+      mysql:
+        condition: service_healthy # Espera a que la BD esté lista
+        
+# Volúmenes para persistencia
+volumes:
+  mysql_data:
