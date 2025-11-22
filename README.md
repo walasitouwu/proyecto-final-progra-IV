@@ -11,11 +11,7 @@ GET: http://localhost:5000/health
 JSON 
 
 Body: 
-{
-    "type": "Email",
-    "recipient": "test@ejemplo.com",
-    "body": "Registro de prueba en BD."
-}
+
 
 probar en postman:
 GET http://localhost:5000/health
